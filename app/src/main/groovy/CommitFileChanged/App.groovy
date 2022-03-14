@@ -75,7 +75,7 @@ class App {
 
 
     static void main(String[] args) {
-        if(args[0] == 'Analisys')
+        if(args[0] == 'Analysis')
             new App().generateAnalysis(args)
         else
             System.exit(127)
