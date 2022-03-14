@@ -24,7 +24,7 @@ The jar require the following list of inputs, in order, to run correctly:
 - Java home path
 
 The execution of the jar would look something like this:  
-`java -jar Analysis 7bdb36 8shf34 ksjd22 bca6dk /usr/local_rep/ usr/sam_dc_dependencies/ usr/java/ usr/maven/`  
+`java -jar ${your_local_repository}/app/build/libs/data-collector-1.0.jar Analysis 7bdb36 8shf34 ksjd22 bca6dk /usr/target_local_rep/ usr/sam_dc_dependencies/ usr/java/ usr/maven/`  
 
 ## Dependencies  
 [DiffJ](https://github.com/jpace/diffj)  
