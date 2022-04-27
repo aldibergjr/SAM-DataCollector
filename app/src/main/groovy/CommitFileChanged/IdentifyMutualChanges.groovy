@@ -23,7 +23,7 @@ class IdentifyMutualChanges {
             * unexpected crashes
             */
             return false;
-        } 
+        }
 
         Set<String> leftModifiedFiles = FileManager.getModifiedFiles(project, mergeCommit.getLeftSHA(), mergeCommit.getAncestorSHA())
         Set<String> rightModifiedFiles = FileManager.getModifiedFiles(project, mergeCommit.getRightSHA(), mergeCommit.getAncestorSHA())
@@ -33,10 +33,8 @@ class IdentifyMutualChanges {
         for(file in mutuallyModifiedFiles) {
             Set<String> leftModifiedAttributesAndMethods = getModifiedAttributesAndMethods(project, file, mergeCommit.getAncestorSHA(), mergeCommit.getLeftSHA())
             Set<String> rightModifiedAttributesAndMethods = getModifiedAttributesAndMethods(project, file, mergeCommit.getAncestorSHA(), mergeCommit.getRightSHA())
-           
             leftModifiedAttributesAndMethods.retainAll(rightModifiedAttributesAndMethods) // Intersection.
             infoModified.put(file, leftModifiedAttributesAndMethods)
-            
         }
 
         return infoModified

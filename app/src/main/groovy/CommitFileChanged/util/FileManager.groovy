@@ -1,10 +1,10 @@
 package util
 
-import java.nio.file.Files 
+import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.Path
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import org.apache.commons.io.FileUtils 
+import org.apache.commons.io.FileUtils
 
 import project.*
 
@@ -12,7 +12,6 @@ final class FileManager {
 
     public static Set<String> getModifiedFiles(Project project, String childSHA, String ancestorSHA) {
         Set<String> modifiedFiles = new HashSet<String>()
-        
         Process gitDiff = ProcessRunner.runProcess(project.getPath(), 'git', 'diff', '--name-only', childSHA, ancestorSHA)
         gitDiff.getInputStream().eachLine {
             if(it.endsWith('.java'))
@@ -34,10 +33,9 @@ final class FileManager {
         }
         return modifiedFiles
     }
-    
+
     public static File copyFile(Project project, String path, String SHA) {
-        Process gitCatFile = ProcessRunner.runProcess(project.getPath(), 'git', 'cat-file', '-p', "${SHA}:${path}")    
-        
+        Process gitCatFile = ProcessRunner.runProcess(project.getPath(), 'git', 'cat-file', '-p', "${SHA}:${path}")
         StringBuilder sb = new StringBuilder();
         File target = new File("${SHA}.java")
 
@@ -75,17 +73,28 @@ final class FileManager {
         if (!file.isDirectory())
             file.delete()
         else {
-            if (file.list().length == 0) 
+            if (file.list().length == 0)
                 file.delete()
             else {
                 String[] files = file.list()
                 for (temp in files) {
                     delete(new File(file, temp))
                 }
-                if (file.list().length == 0) 
+                if (file.list().length == 0)
                     file.delete()
             }
         }
+    }
+
+    static String getFilePackageName(String filePath){
+        def package_name
+        new File(filePath).withReader {
+            String[] line = (it.readLine()).split(' ')
+            while(line[0] != 'package')
+                line = it.readLine().split(' ')
+            package_name = (line[1]).replace(';', '') + "."
+        }
+        return package_name
     }
 
     static File getFileInCommit(Project project, String filePath, String commitSHA) {
@@ -157,5 +166,23 @@ final class FileManager {
 
     static synchronized void appendLineToFile(File file, String line) {
         file << "${line}\n"
+    }
+
+    static void changeJarsName(String jarsPath, MergeCommit scneario, String method){
+        def m_jar = new File(jarsPath + scneario.getSHA() + '.jar')
+        m_jar.renameTo jarsPath + scneario.getSHA() + '-' + method + '.jar'
+        m_jar.close()
+
+        def l_jar = new File(jarsPath + scneario.getLeftSHA() + '.jar')
+        l_jar.renameTo jarsPath + scneario.getLeftSHA() + '-' + method + '.jar'
+        l_jar.close()
+
+        def r_jar = new File(jarsPath + scneario.getRightSHA() + '.jar')
+        r_jar.renameTo jarsPath + scneario.getRightSHA() + '-' + method + '.jar'
+        r_jar.close()
+
+        def a_jar = new File(jarsPath + scneario.getAncestorSHA() + '.jar')
+        a_jar.renameTo jarsPath + scneario.getAncestorSHA() + '-' + method + '.jar'
+        a_jar.close()
     }
 }

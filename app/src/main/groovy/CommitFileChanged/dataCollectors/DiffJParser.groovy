@@ -17,13 +17,11 @@ class DiffJParser {
 
     public Map<String, int[]> parse (List<String> lines) {
         def result = new HashMap<String, int[]>();
-        
         def iterator = lines.iterator();
         dropFirstLine(iterator);
 
         while(iterator.hasNext()) {
             def line = iterator.next();
-            
             if (isMethodChangeLine(line)) {
                 def modifiedLinesRange = getModifiedLinesRange(line);
                 def begin = modifiedLinesRange[INT_ZERO];
@@ -61,11 +59,11 @@ class DiffJParser {
         if (iterator.hasNext()) {
             iterator.next();
         }
-    } 
+    }
 
     private boolean isMethodChangeLine(String line) {
         Matcher matcher = METHOD_CHANGE_HEADER_REGEX.matcher(line);
-        
+
         return matcher.find();
     }
 
@@ -76,7 +74,6 @@ class DiffJParser {
     private int[] getModifiedLinesRange(String headerLine) {
         String[] splittedHeaderLine = headerLine.split(":");
         if (splittedHeaderLine.length <= 1) {
-          
         }
 
         String modifiedLinesPart = splittedHeaderLine[INT_ZERO]
@@ -88,10 +85,10 @@ class DiffJParser {
         return getNumbersRange(splittedModifiedLinesPart[INT_ONE]);
     }
 
-    private int[] getNumbersRange(String rangeString) {        
+    private int[] getNumbersRange(String rangeString) {
         try {
             def splittedNewLines = rangeString.split(",")
-            
+
             int begin = Integer.parseInt(splittedNewLines[INT_ZERO])
             int end = begin;
             if (splittedNewLines.size() > INT_ONE) {

@@ -11,7 +11,7 @@ class SMATConfig {
                 "\"projects_folder\": \"\","+
                 "\"path_hash_csv\": \""+ dependencies_path + input_csv_name+ "\"," +
                 "\"tests_dst\": \"\","+
-                "\"path_output_csv\": \""+dependencies_path+ "/output.csv"+ "\"" +
+                "\"path_output_csv\": \"\"" +
                 "}"
         config_json.write config_obj
     }

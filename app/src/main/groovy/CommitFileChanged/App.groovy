@@ -3,6 +3,7 @@
  */
 package com.CommitFileChanged
 import project.Project
+import dataCollectors.MethodSignatureMatcher
 import project.MergeCommit
 import util.FileManager
 import util.ProcessRunner
@@ -32,7 +33,7 @@ class App {
 
     List<String> generateAnalysis(String[] args){
         this.working_dir = args[5]
-        List<String> outp;
+        def outp;
         project = new Project(working_dir)
         def_mergeScenario(args)
         String dependencies_path = args[6]
@@ -41,6 +42,7 @@ class App {
         SMATConfig.createConfig(dependencies_path, java_home, maven_home)
         System.setProperty('dependencies.path', dependencies_path )
         def csv = new File(dependencies_path + csv_name)
+        def jarsPath = this.working_dir + "/../GeneratedJars/" + this.project.getName() + "/"
         FileManager.delete(csv)
         Map<String, List<String>> modifiedClassMethods = getModifiedClassMethodsList()
         if(modifiedClassMethods.isEmpty())
@@ -50,21 +52,22 @@ class App {
                 String method_name = ((String)method).split('\\(')[0]
                 String[] class_path = class_name.split('/')
                 String class_name_p = class_path[class_path.length -1];
-                Process osean = ProcessRunner.runProcess('.', 'java', '-jar', dependencies_path+'/Osean.jar', working_dir , class_name_p, method_name, this.project.getName(),this.merge_scenario.getSHA(), this.merge_scenario.getLeftSHA(), this.merge_scenario.getRightSHA(), this.merge_scenario.getAncestorSHA() )
+                Process osean = ProcessRunner.runProcess('.', 'java', '-jar', dependencies_path+'/Osean.jar', working_dir , class_name_p, method_name, this.project.getName(), 'true', 'true', '60', this.merge_scenario.getSHA(), this.merge_scenario.getLeftSHA(), this.merge_scenario.getRightSHA(), this.merge_scenario.getAncestorSHA() )
                 BufferedReader reader = new BufferedReader(new InputStreamReader(osean.getInputStream()))
-                reader.readLines()
-                def f_package
-                new File(this.working_dir + "/" + class_name).withReader {f_package = it.readLine()}
-                String cleaned_class_name = class_name_p.replace('.java', '')
-                f_package = (f_package.split(' ')[1]).replace(';', '') + "." + cleaned_class_name
+                println reader.readLines()
 
-                def jarsPath = this.working_dir + "/../GeneratedJars/" + this.project.getName() + "/"
+                String cleaned_class_name = class_name_p.replace('.java', '')
+                String f_package = (FileManager.getFilePackageName(this.working_dir + "/" + class_name)) + cleaned_class_name
+                //FileManager.changeJarsName(jarsPath, this.merge_scenario, method_name)
+                def signature_method_name = new MethodSignatureMatcher().findMethodSignature(jarsPath + this.merge_scenario.getSHA() + '-' + method_name + ".jar", f_package, method)
+
+
                 String csvLine =this.project.getName() + "," + "true" + "," + this.merge_scenario.getSHA() + "," + this.merge_scenario.getLeftSHA() + "," + this.merge_scenario.getRightSHA() +
-                "," +  this.merge_scenario.getAncestorSHA() + "," + f_package + "," + method + ","  + ","  + "," +
-                jarsPath + this.merge_scenario.getAncestorSHA()  + ".jar" + "," +
-                jarsPath + this.merge_scenario.getLeftSHA() + ".jar" + "," +
-                jarsPath + this.merge_scenario.getRightSHA() + ".jar" + "," +
-                jarsPath + this.merge_scenario.getSHA() + ".jar" + "," +
+                "," +  this.merge_scenario.getAncestorSHA() + "," + f_package + "," + signature_method_name + ","  + ","  + "," +
+                jarsPath + this.merge_scenario.getAncestorSHA()  + '-' + method_name + ".jar" + "," +
+                jarsPath + this.merge_scenario.getLeftSHA() + '-' + method_name + ".jar" + "," +
+                jarsPath + this.merge_scenario.getRightSHA() + '-' + method_name + ".jar" + "," +
+                jarsPath + this.merge_scenario.getSHA() + '-' + method_name + ".jar" + "," +
                 "transformed"
                 csv.append(csvLine + "\n")
             }
@@ -76,7 +79,7 @@ class App {
 
     static void main(String[] args) {
         if(args[0] == 'Analysis')
-            new App().generateAnalysis(args)
+            println new App().generateAnalysis(args)
         else
             System.exit(127)
     }
